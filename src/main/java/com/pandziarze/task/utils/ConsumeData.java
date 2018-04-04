@@ -2,15 +2,18 @@ package com.pandziarze.task.utils;
 
 import java.net.URI;
 
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.pandziarze.task.exceptions.InvalideResponseCodeException;
+import com.pandziarze.task.exceptions.ConsumeDateException;
 
 public final class ConsumeData {
+	private static final Logger logger = LoggerFactory.getLogger(ConsumeData.class);
 
 	private ConsumeData() {
 		throw new AssertionError();
@@ -20,11 +23,16 @@ public final class ConsumeData {
 		RequestEntity<?> request = RequestEntity.get(url)
 				.accept(MediaType.APPLICATION_JSON).build();
 
-		ResponseEntity<T> exchange = restTemplate
+		try {
+			ResponseEntity<T> exchange = restTemplate
 				.exchange(request, responseType);
-		if (!exchange.getStatusCode().equals(HttpStatus.OK)) {
-		  	throw new InvalideResponseCodeException("Status code is not 200");
+				return exchange.getBody();
 		}
-		return exchange.getBody();
+		catch (HttpClientErrorException e) {
+			logger.error("HttpClientError {} in url {} call", e.getMessage(), url, e);
+			ConsumeDateException exc = new ConsumeDateException(e.getMessage());
+		  	exc.initCause(e);
+			throw exc;
+		}
 	}
 }

@@ -1,9 +1,9 @@
 package com.pandziarze.task.exceptions;
 
-public class InvalideResponseCodeException extends RuntimeException {
+public class ConsumeDateException extends RuntimeException {
 	private static final long serialVersionUID = 7605358825121628109L;
 
-	public InvalideResponseCodeException(String message) {
+	public ConsumeDateException(String message) {
 		super(message);
 	}
 
